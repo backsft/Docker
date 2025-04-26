@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: studentapp-postgres
+    environment:
+      POSTGRES_DB: studentdb
+      POSTGRES_USER: studentuser
+      POSTGRES_PASSWORD: studentpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - student_data:/var/lib/postgresql/data
+    networks:
+      - studentapp-network
+
+  studentapp:
+    build: .
+    container_name: studentapp
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/studentdb
+      SPRING_DATASOURCE_USERNAME: studentuser
+      SPRING_DATASOURCE_PASSWORD: studentpass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - postgres
+    networks:
+      - studentapp-network
+
+volumes:
+  student_data:
+
+networks:
+  studentapp-network:
+    driver: bridge
